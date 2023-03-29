@@ -12,4 +12,4 @@ Runs on .NET 7
 
 1. `cd path/to/{Sender|Listener}`
 2. `dotnet publish -o publish/ -c Release`
-3. `sc.exe create "{Service Name}" binpath="path/to/publish/{Sender|Listener}.exe"
+3. `sc.exe create "{Service Name}" binpath="path/to/publish/{Sender|Listener}.exe`
