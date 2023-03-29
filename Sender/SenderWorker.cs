@@ -5,8 +5,6 @@ namespace Sender;
 
 public class SenderWorker : BackgroundService
 {
-    readonly Random _rnd = new Random();
-
     readonly ILogger<SenderWorker> _logger;
     readonly AzureServiceBusOptions _options;
 
@@ -33,16 +31,16 @@ public class SenderWorker : BackgroundService
   <ReceiverAppMessageID>LN248648</ReceiverAppMessageID> 
   <ResponseType>ACK</ResponseType> 
   <DEALNUMBER>{id}</DEALNUMBER> 
-  <DateTime>2019-02-01T00:00:00.0000000-05:00</DateTime> 
-</CSIPResponse> 
-";
+  <DateTime>{DateTime.UtcNow}</DateTime> 
+</CSIPResponse>";
+
             var message = new ServiceBusMessage(xmlMsg);
             await sender.SendMessageAsync(message, stoppingToken);
 
             _logger.LogInformation($"Sent message #{id++}.");
 
-			var delayTime = TimeSpan.FromSeconds(_rnd.NextInt64(1, 10));
-			await Task.Delay(delayTime, stoppingToken);
+            Console.WriteLine("Press any key to send a message");
+            Console.ReadKey();
 		}
     }
 }

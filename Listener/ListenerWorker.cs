@@ -17,8 +17,12 @@ public class ListenerWorker : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await using var client = new ServiceBusClient(_options.ConnectionString);
-        var receiver = client.CreateReceiver(_options.QueueName);
-
+        
+        var receiver = client.CreateReceiver(_options.QueueName, new ServiceBusReceiverOptions
+        {
+            ReceiveMode = ServiceBusReceiveMode.ReceiveAndDelete
+		});
+        
         while (!stoppingToken.IsCancellationRequested)
         {
             var receivedMessage = await receiver.ReceiveMessageAsync();

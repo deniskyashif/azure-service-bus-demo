@@ -1,13 +1,17 @@
+using Microsoft.Extensions.Logging.Configuration;
+using Microsoft.Extensions.Logging.EventLog;
 using Sender;
 
-IHost host = Host.CreateDefaultBuilder(args)
-    .ConfigureServices((builderContext, services) =>
-    {
-		services.Configure<AzureServiceBusOptions>(
-            builderContext.Configuration.GetRequiredSection(nameof(AzureServiceBusOptions)));
+var builder = Host.CreateApplicationBuilder(args);
 
-		services.AddHostedService<SenderWorker>();
-    })
-    .Build();
+builder.Services.AddWindowsService(options => options.ServiceName = ".NET ASB Sender Service");
 
+LoggerProviderOptions.RegisterProviderOptions<EventLogSettings, EventLogLoggerProvider>(builder.Services);
+
+builder.Services.Configure<AzureServiceBusOptions>(builder.Configuration.GetRequiredSection(nameof(AzureServiceBusOptions)));
+builder.Services.AddHostedService<SenderWorker>();
+
+builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
+
+IHost host = builder.Build();
 host.Run();

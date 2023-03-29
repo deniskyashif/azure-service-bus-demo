@@ -1,12 +1,20 @@
 using Listener;
+using Microsoft.Extensions.Logging.Configuration;
+using Microsoft.Extensions.Logging.EventLog;
 
-IHost host = Host.CreateDefaultBuilder(args)
-    .ConfigureServices((builderContext, services) =>
-    {
-        services.Configure<AzureServiceBusOptions>(
-            builderContext.Configuration.GetRequiredSection(nameof(AzureServiceBusOptions)));
-        services.AddHostedService<ListenerWorker>();
-    })
-    .Build();
+var builder = Host.CreateApplicationBuilder(args);
 
+builder.Services.AddWindowsService(options =>
+{
+	options.ServiceName = ".NET ASB Listener Service";
+});
+
+LoggerProviderOptions.RegisterProviderOptions<EventLogSettings, EventLogLoggerProvider>(builder.Services);
+
+builder.Services.Configure<AzureServiceBusOptions>(builder.Configuration.GetRequiredSection(nameof(AzureServiceBusOptions)));
+builder.Services.AddHostedService<ListenerWorker>();
+
+builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
+
+IHost host = builder.Build();
 host.Run();
